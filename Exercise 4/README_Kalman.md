@@ -3,7 +3,7 @@
 ## 1. Introduction to Kalman Filter
 Imagine you are tracking a moving object (like a face) using a camera. The camera gives you measurements of the position $(x, y, z)$, but these measurements are noisy—they jump around a bit even if the face is still. A Kalman filter is a mathematical tool that helps you "smooth" these measurements to get a better estimate of the true position.
 
-It works in two steps:
+It works in two steps: 
 1.  **Predict**: Based on where the object was a moment ago and how it was moving, guess where it is now.
 2.  **Update**: Look at the new measurement from the camera. Combine your prediction with the measurement to get a refined estimate.
 
