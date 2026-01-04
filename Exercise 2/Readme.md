@@ -1,4 +1,4 @@
-Face Detection and 3D Reconstruction
+Face Detection and 3D Reconstruction  
 
 This project detects faces from a webcam feed and estimates their 3D position in the camera coordinate frame using a calibrated monocular camera.
 
