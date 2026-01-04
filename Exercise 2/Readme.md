@@ -8,7 +8,7 @@ This project detects faces from a webcam feed and estimates their 3D position in
   - Back-projection: \( [X, Y, Z]^T = Z \cdot K^{-1} [u, v, 1]^T \)
 - The results are plotted live using DearPyGui.
 
-## Run
+## Run  
 ```bash
 python "face solution.py"
 
