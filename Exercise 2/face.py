@@ -7,6 +7,9 @@ import os
 import pickle
 import numpy as np
 
+FACE_MODEL_PATH = "yolo26n-face.pt"
+PERSON_MODEL_PATH = "yolo26n.pt"
+
 # YOUR JOB: Implement processFace to compute x,y,z from face bounding box
 
 from DataPlot import DataPlot
@@ -20,7 +23,14 @@ class FaceGui:
 
 		# Initialize face detector
 		from ultralytics import YOLO
-		self.model = YOLO("yolo26n.pt")
+		try:
+			self.model = YOLO(FACE_MODEL_PATH)
+			self.detection_mode = "face"
+			print("Loaded YOLO26 face model")
+		except Exception:
+			self.model = YOLO(PERSON_MODEL_PATH)
+			self.detection_mode = "person"
+			print("Face model not found, using person detection with head crop")
 		self.video_capture = cv2.VideoCapture(0)
 		self.width = int(self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
 		self.height = int(self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -102,6 +112,9 @@ class FaceGui:
 				box = results[0].boxes[0]
 				if box.conf[0] > 0.5:
 					x1, y1, x2, y2 = map(int, box.xyxy[0])
+					if self.detection_mode == "person":
+						head_height = int((y2 - y1) * 0.35)
+						y2 = y1 + head_height
 					cv2.rectangle(frame, (x1, y1), (x2, y2),(255,0,0), 2)
 					u0 = x1
 					v0 = y1

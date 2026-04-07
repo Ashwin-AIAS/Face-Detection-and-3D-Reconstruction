@@ -9,6 +9,8 @@ This project detects faces from a webcam feed and estimates their 3D position in
   - Back-projection: \( [X, Y, Z]^T = Z \cdot K^{-1} [u, v, 1]^T \)
 - The results are plotted live using DearPyGui.
 
+*Note: For better accuracy, use a face-specific YOLO26 model. You can train one on WIDER Face or download a pre-trained model from Roboflow/Ultralytics Hub.*
+
 ## Run  
 ```bash
 python "face solution.py"
