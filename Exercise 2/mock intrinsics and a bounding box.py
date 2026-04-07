@@ -9,7 +9,7 @@ K = np.array([[fx, 0.0, cx],
 			  [0.0, fy, cy],
 			  [0.0, 0.0, 1.0]])
 
-# Example bounding box in pixels
+# Example bounding box in pixels (this test works with any detector's bounding box output)
 u0, v0 = 200, 150   # top-left
 u1, v1 = 280, 350   # bottom-right -> height = 200 px
 

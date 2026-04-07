@@ -1,8 +1,9 @@
-Face Detection and 3D Reconstruction   
+# Face Detection and 3D Reconstruction (YOLO26)
 
 This project detects faces from a webcam feed and estimates their 3D position in the camera coordinate frame using a calibrated monocular camera.
 
 ## How It Works
+- YOLO26 replaces Haar cascades for face detection.
 - The function `processFace()` estimates (x, y, z) in millimetres using the pinhole camera model:
   - Depth: \( Z = f_y \times H_{real} / h_{pixels} \)
   - Back-projection: \( [X, Y, Z]^T = Z \cdot K^{-1} [u, v, 1]^T \)
@@ -16,7 +17,8 @@ python "face solution.py"
 To prepare your work environment, you need
 * Python 3.10 or later -- www.python.org
 * The DearPyGui user interface library. Install with "pip install dearpygui" (pip comes with the Python3.x you just installed).
-* The OpenCV computer vision library. Install with "pip install opencv-python".
+* The YOLO26 integration from Ultralytics (includes OpenCV). Install with "pip install ultralytics".
+* Note: On the first run, the YOLO26n model weights (~5MB) will auto-download.
 * Nothing else should be required. Let me know if you can't get it to work.
 
 ### Some usage hints

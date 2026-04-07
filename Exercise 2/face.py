@@ -1,9 +1,7 @@
 import dearpygui.dearpygui as dpg
 import sys
-import select
 import time
 import math
-import sys
 import cv2
 import os
 import pickle
@@ -21,8 +19,8 @@ class FaceGui:
 		self.xyzplot = DataPlot(("x", "y", "z"), 1000)
 
 		# Initialize face detector
-		cascPathface = os.path.dirname(cv2.__file__) + "/data/haarcascade_frontalface_alt2.xml"
-		self.faceCascade = cv2.CascadeClassifier(cascPathface)
+		from ultralytics import YOLO
+		self.model = YOLO("yolo26n.pt")
 		self.video_capture = cv2.VideoCapture(0)
 		self.width = int(self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
 		self.height = int(self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -49,9 +47,36 @@ class FaceGui:
 		# (u0,v0) is top-left of face bounding box
 		# (u1,v1) is bottom-right of face bounding box
 		# Returns (x,y,z) in mm of face center in camera coordinates
-		# YOUR JOB: Implement this function
 
-		return (0, 0, 0)
+		# Validate K is a 3x3 matrix
+		K = np.array(K)
+		if K.shape != (3, 3):
+			return (0, 0, 0)
+
+		fx = K[0, 0]
+		fy = K[1, 1]
+		cx = K[0, 2]
+		cy = K[1, 2]
+
+		# Compute horizontal angles to left and right edges of bounding box
+		angle_left  = math.atan2(u0 - cx, fx)
+		angle_right = math.atan2(u1 - cx, fx)
+
+		# Depth from known face width and angular spread
+		denom = math.sin(angle_right) - math.sin(angle_left)
+		if abs(denom) < 1e-8:
+			return (0, 0, 0)
+		z_mm = FACE_WIDTH_MM / denom
+
+		# Center pixel of bounding box
+		u_c = (u0 + u1) / 2.0
+		v_c = (v0 + v1) / 2.0
+
+		# Back-project center pixel to camera coordinates
+		x_mm =  (z_mm / fx) * (u_c - cx)
+		y_mm = -(z_mm / fy) * (v_c - cy)
+
+		return (float(x_mm), float(y_mm), float(z_mm))
 
 	def run(self):
 		dpg.create_context()
@@ -70,17 +95,18 @@ class FaceGui:
 				break
 			# Undistort frame
 			frame = cv2.remap(frame, self.mapx, self.mapy, cv2.INTER_LINEAR)
-			# Convert to greyscale and detect faces
-			gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-			faces = self.faceCascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60),flags=cv2.CASCADE_SCALE_IMAGE)
+			# Detect faces with YOLO
+			results = self.model(frame, classes=[0], verbose=False)
 			
-			if len(faces) > 0:
-				(x, y, w, h) = faces[0]
-				cv2.rectangle(frame, (x, y), (x + w, y + h),(255,0,0), 2)
-				u0 = x
-				v0 = y
-				u1 = x + w
-				v1 = y + h
+			if len(results[0].boxes) > 0:
+				box = results[0].boxes[0]
+				if box.conf[0] > 0.5:
+					x1, y1, x2, y2 = map(int, box.xyxy[0])
+					cv2.rectangle(frame, (x1, y1), (x2, y2),(255,0,0), 2)
+					u0 = x1
+					v0 = y1
+					u1 = x2
+					v1 = y2
 				(xmm, ymm, zmm) = self.processFace(self.mtx, u0, v0, u1, v1)
 				self.xyzplot.addDataVector(frameno, (xmm, ymm, zmm))
 				cv2.putText(frame, f"x={xmm:.0f}mm y={ymm:.0f}mm z={zmm:.0f}mm", (u0, v0-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 2)

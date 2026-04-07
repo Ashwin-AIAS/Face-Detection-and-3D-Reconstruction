@@ -1,3 +1,4 @@
 numpy
+ultralytics>=8.3
 opencv-python-headless
-dearpygui==1.10.1
+dearpygui==1.10.1ultralytics>=8.3
